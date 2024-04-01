@@ -28,12 +28,35 @@ async function getAccessToken(clientId, clientSecret, code) {
 function getScopesNeededForJiraIntegration() {
     return [
         "write:jira-work",
-        "read:jira-user" 
+        "read:jira-work",
+        "read:jira-user",
+        "read:issue:jira",
+       "manage:jira-project"
     ]
 }
+
+function extractInfoFromCode(code) {
+    const [userId, integrationId] = code.split(":")
+    return {
+        userId,
+        integrationId,
+    }
+}
+
+async function listProjects(token) {
+    const response = await axios.get('https://akshat-sandhaliya16.atlassian.net/rest/api/2/project/search', {
+        headers: {
+            'Authorization': `Basic ${token}`,
+            'Accept': 'application/json'
+        },
+    })
+    console.log("response", response)
+}   
 
 module.exports = {
     getJiraRedirectUri,
     getScopesNeededForJiraIntegration,
     getAccessToken,
+    extractInfoFromCode,
+    listProjects,
 }
