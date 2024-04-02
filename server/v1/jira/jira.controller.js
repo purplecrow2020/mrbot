@@ -16,6 +16,7 @@ async function createIntegration(req, res) {
         const newIntegration = await mongo.collection('jiraintegrations').insertOne({
             userId: _id,
             name,
+            success: false,
         })
         const config = req.app.get('config');
         const redirectUrl = jiraService.getJiraRedirectUri(config.jira.clientId, 'http://localhost:9000/v1/jira/callback', `${_id.toString()}:${newIntegration.insertedId.toString()}`);
@@ -42,7 +43,7 @@ async function getAllIntegrations(req, res) {
         const mongo = req.app.get('db')
         const integrations = await mongo.collection('jiraintegrations').find({
             userId: new ObjectId(_id),
-        })
+        }).toArray();
         return res.json({
             "meta": {
                 "success": true,
@@ -72,10 +73,11 @@ async function handleJiraIntCallback(req, res) {
         },{
             $set: {
                 token,
+                success: true,
             }
         });
 
-        res.redirect(301, `http://localhost:5173/jira-integration/${integrationId}`)
+        res.redirect(301, `http://localhost:5173/layout/jira-integration/${integrationId}`)
     } catch (err) {
         console.log(err);
     }
