@@ -9,5 +9,7 @@ const jiraController = require('./jira.controller')
 router.route('/integration').post(validate(paramValidation.jira.createIntegration), AuthMiddleware.authenticate, jiraController.createIntegration);
 router.route('/callback').get(validate(paramValidation.jira.createIntegration), jiraController.handleJiraIntCallback);
 router.route('/projects').get(validate(paramValidation.jira.createIntegration), jiraController.getJiraProjects);
+router.route('/integrations').get(validate(paramValidation.jira.createIntegration), AuthMiddleware.authenticate, jiraController.getAllIntegrations);
+
 
 module.exports = router;

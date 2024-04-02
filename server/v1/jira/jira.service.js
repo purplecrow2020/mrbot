@@ -30,8 +30,8 @@ function getScopesNeededForJiraIntegration() {
         "write:jira-work",
         "read:jira-work",
         "read:jira-user",
-        "read:issue:jira",
-       "manage:jira-project"
+        "read:issue-jira",
+        "manage:jira-project"
     ]
 }
 
@@ -43,14 +43,46 @@ function extractInfoFromCode(code) {
     }
 }
 
-async function listProjects(token) {
-    const response = await axios.get('https://akshat-sandhaliya16.atlassian.net/rest/api/2/project/search', {
+
+function getJiraInstanceUrlForProject(id) {
+    return `https://api.atlassian.com/ex/jira/${id}/rest/api/3/project`;
+}
+
+async function getJiraInstanceDetails(token) {
+    return axios.get('https://api.atlassian.com/oauth/token/accessible-resources', {
         headers: {
-            'Authorization': `Basic ${token}`,
+            'Authorization': `Bearer ${token}`,
             'Accept': 'application/json'
         },
     })
-    console.log("response", response)
+}
+
+async function listProjects(token) {
+    const instanceDetails = await getJiraInstanceDetails(token).then((res) => res.data)
+    console.log("instanceDetailsinstanceDetails", instanceDetails)
+    const id = instanceDetails[0].id
+    const url = getJiraInstanceUrlForProject(id)
+    const response = await axios.get(url, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+        },
+    })
+
+    const data = response.data.map(({
+        key,
+        name,
+        avatarUrls,
+        id,
+    }) => {
+        return {
+            projectKey: key,
+            projectLabel: name,
+            avatars: avatarUrls,
+            projectId: id,
+        }
+    })
+    return data;
 }   
 
 module.exports = {
