@@ -110,6 +110,141 @@ async function getJiraProjects(req, res) {
     }
 }
 
+async function getAllIssuesOfSelectedProject(req, res){
+    try {
+        const projectId = req.params.projectId;
+        let dummyData = {};
+        if (projectId){
+            dummyIssuesData = {
+                "projectId": "10000",
+                "projectKey": "TA",
+                "issues": [
+                    {
+                        "issueId" : 'iss01',
+                        "title": "form validation testing 1",
+                        "ticketNumber": "ABC121",
+                        "commentCount": "1",
+                        "assignedUser": "airKing05",
+                        "status": "not-done"
+                    },
+                    {
+                        "issueId": 'iss02',
+                        "title": "form validation testing 2",
+                        "ticketNumber": "ABC122",
+                        "commentCount": "2",
+                        "assignedUser": "gyanTherapy",
+                        "status": "done"
+                    },
+                    {
+                        "issueId": 'iss03',
+                        "title": "form validation testing 3",
+                        "ticketNumber": "ABC123",
+                        "commentCount": "3",
+                        "assignedUser": "tg",
+                        "status": "in-progress"
+                    },
+                    {
+                        "issueId": 'iss04',
+                        "title": "form validation testing 4",
+                        "ticketNumber": "ABC124",
+                        "commentCount": "4",
+                        "assignedUser": "burner",
+                        "status": "in-progress"
+                    },
+                    {
+                        "issueId": 'iss05',
+                        "title": "form validation testing 5",
+                        "ticketNumber": "ABC125",
+                        "commentCount": "5",
+                        "assignedUser": "mao",
+                        "status": "not-done"
+                    },
+
+                ]
+            }
+
+            return res.json({
+                "meta": {
+                    "success": true,
+                },
+                "data": {
+                    ...dummyIssuesData,
+                },
+            })
+        }else{
+            return res.json({
+                "meta": {
+                    "success": false,
+                },
+                "data": {
+                    dummyData,
+                },
+            }) 
+        }
+        
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+async function getDetailsOfSelectedIssuesOfSelectedProject(req, res){
+    try {
+        const {projectId, issueId} = req.params;
+        let dummyIssueData = {};
+        if (issueId) {
+            dummyIssueData = {
+                "title": "form validation testing 1",
+                "ticketNumber": "ABC121",
+                "commentCount": "1",
+                "assignedUser": "airKing05",
+                "status": "not-done",
+                "tags" : ["Not attempted", "Watched"],
+                "assignedAt" : "15PM, 01 APRIL 2024",
+                "description": "includes and Set.has() both used for searching for a specific value within an array or set.",
+                "comments": [
+                    {
+                        "comment": "this is the first comment for this issue",
+                        "user": "blueSky",
+                        "commentedAt": "20PM, 01 APRIL 2024",
+                        "assignedUser": "airKing05",
+                    },
+                    {
+                        "comment": "this is the first comment for this issue",
+                        "user": "prakashRaj",
+                        "commentedAt": "10AM, 02 APRIL 2024",
+                        "assignedUser": "airKing05",
+                    },
+                    {
+                        "comment": "this is the first comment for this issue",
+                        "user": "airKing05",
+                        "commentedAt": "13PM, 02 APRIL 2024",
+                        "assignedUser": "airKing05",
+                    },
+                ]
+            }
+            return res.json({
+                "meta": {
+                    "success": true,
+                },
+                "data": {
+                    ...dummyIssueData,
+                },
+            })
+        } else {
+            return res.json({
+                "meta": {
+                    "success": false,
+                },
+                "data": {
+                    dummyIssueData,
+                },
+            })
+        }
+
+    } catch (err) {
+        console.log(err);
+    }
+}
 
 
 module.exports = {
@@ -117,4 +252,6 @@ module.exports = {
     handleJiraIntCallback,
     getJiraProjects,
     getAllIntegrations,
+    getAllIssuesOfSelectedProject,
+    getDetailsOfSelectedIssuesOfSelectedProject
 }

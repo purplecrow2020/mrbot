@@ -11,5 +11,7 @@ router.route('/callback').get(validate(paramValidation.jira.createIntegration), 
 router.route('/projects').get(validate(paramValidation.jira.createIntegration), jiraController.getJiraProjects);
 router.route('/integrations').get(validate(paramValidation.jira.createIntegration), AuthMiddleware.authenticate, jiraController.getAllIntegrations);
 
+router.route('/projects/:projectId/issues').get(validate(paramValidation.jira.createIntegration), AuthMiddleware.authenticate, jiraController.getAllIssuesOfSelectedProject);
+router.route('/projects/:projectId/issues/:issueId').get(validate(paramValidation.jira.createIntegration), AuthMiddleware.authenticate, jiraController.getDetailsOfSelectedIssuesOfSelectedProject);
 
 module.exports = router;
