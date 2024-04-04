@@ -10,6 +10,7 @@ router.route('/integration').post(validate(paramValidation.jira.createIntegratio
 router.route('/callback').get(validate(paramValidation.jira.createIntegration), jiraController.handleJiraIntCallback);
 router.route('/projects').get(validate(paramValidation.jira.createIntegration), jiraController.getJiraProjects);
 router.route('/integrations').get(validate(paramValidation.jira.createIntegration), AuthMiddleware.authenticate, jiraController.getAllIntegrations);
+router.route('/integrations/:integrationId').delete(validate(paramValidation.jira.createIntegration), AuthMiddleware.authenticate, jiraController.deleteIntegrationBySelectedIntegrationId);
 
 router.route('/projects/:projectId/issues').get(validate(paramValidation.jira.createIntegration), AuthMiddleware.authenticate, jiraController.getAllIssuesOfSelectedProject);
 router.route('/projects/:projectId/issues/:issueId').get(validate(paramValidation.jira.createIntegration), AuthMiddleware.authenticate, jiraController.getDetailsOfSelectedIssuesOfSelectedProject);

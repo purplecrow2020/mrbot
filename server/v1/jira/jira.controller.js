@@ -57,6 +57,28 @@ async function getAllIntegrations(req, res) {
     }
 }
 
+async function deleteIntegrationBySelectedIntegrationId(req, res){
+    try {
+        const {
+            integrationId,
+        } = req.params;
+
+        const mongo = req.app.get('db')
+        const deletedIntegration = await mongo.collection('jiraintegrations').deleteOne({
+            _id: new ObjectId(integrationId),
+        })
+        return res.json({
+            "meta": {
+                "success": true,
+                "message" : "Integration deleted successfully"
+            },
+            "data": null,
+        })
+    } catch (err) {
+        console.log(err);
+    }
+}
+
 async function handleJiraIntCallback(req, res) {
     const { code, state } = req.query;
     try {
@@ -253,5 +275,6 @@ module.exports = {
     getJiraProjects,
     getAllIntegrations,
     getAllIssuesOfSelectedProject,
-    getDetailsOfSelectedIssuesOfSelectedProject
+    getDetailsOfSelectedIssuesOfSelectedProject,
+    deleteIntegrationBySelectedIntegrationId
 }
