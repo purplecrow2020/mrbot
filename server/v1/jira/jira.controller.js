@@ -12,6 +12,8 @@ async function createIntegration(req, res) {
             _id,
         } = req.user;
 
+        console.log("_____", _id, name)
+
         const mongo = req.app.get('db')
         const newIntegration = await mongo.collection('jiraintegrations').insertOne({
             userId: _id,
@@ -26,6 +28,43 @@ async function createIntegration(req, res) {
             }, 
             "data": {
                 integrationId: newIntegration.insertedId.toString(), 
+                redirectUrl,
+            },
+        })
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+async function updateIntegration(req, res) {
+    try {
+        const {
+            name,
+            integrationId
+        } = req.body;
+
+        const {
+            _id,
+        } = req.user;
+
+        console.log("_____", _id, req.body)
+
+        const mongo = req.app.get('db')
+
+        const filter = { _id: new ObjectId(integrationId) };
+        const update = { $set: { name: name, success: "success" } };
+
+        const newIntegration = await mongo.collection('jiraintegrations').findOneAndUpdate(filter, update, { new: true } )
+
+        console.log("newIntegration+++++++", newIntegration)
+        const config = req.app.get('config');
+        const redirectUrl = jiraService.getJiraRedirectUri(config.jira.clientId, 'http://localhost:9000/v1/jira/callback', `${_id.toString()}:${newIntegration.insertedId.toString()}`);
+        return res.json({
+            "meta": {
+                "success": true,
+            },
+            "data": {
+                integrationId: newIntegration.insertedId.toString(),
                 redirectUrl,
             },
         })
@@ -69,12 +108,20 @@ async function deleteIntegrationBySelectedIntegrationId(req, res){
         })
         return res.json({
             "meta": {
+                "status": 204,
                 "success": true,
                 "message" : "Integration deleted successfully"
             },
             "data": null,
         })
     } catch (err) {
+        return res.json({
+            "status": 404,
+            "meta": {
+                "success": false,
+                "error": ""
+            },
+        })
         console.log(err);
     }
 }
@@ -129,6 +176,41 @@ async function getJiraProjects(req, res) {
         })
     } catch (err) { 
         console.log(err);
+    }
+}
+
+async function updateJiraProjectByProjectId(req, res){
+    try {
+        // const { projectId } = req.params;
+        const { integrationId, projectId } = req.query;
+        const dataToUpdate = req.body;
+
+        console.log(projectId, integrationId, dataToUpdate)
+
+        const mongo = req.app.get('db')
+        const jiraintegration = await mongo.collection('jiraintegrations').findOne({
+            _id: new ObjectId(integrationId),
+        })
+
+        const apiToken = jiraintegration.token.access_token;
+        const updatedProjects = await jiraService.selectedProjectToUpdate(apiToken, projectId, dataToUpdate)
+        console.log("updatedProjects", updatedProjects)
+
+        return res.json({
+            "meta": {
+                "success": true,
+            },
+            "data": {
+                updatedProjects,
+            },
+        })
+        // get the access toke of integration id
+        // go to jira service 
+        // find the project based on integration id and project id
+        // update the project details
+
+    } catch (error) {
+        console.log("error-------", error)
     }
 }
 
@@ -276,5 +358,7 @@ module.exports = {
     getAllIntegrations,
     getAllIssuesOfSelectedProject,
     getDetailsOfSelectedIssuesOfSelectedProject,
-    deleteIntegrationBySelectedIntegrationId
+    deleteIntegrationBySelectedIntegrationId,
+    updateJiraProjectByProjectId,
+    updateIntegration
 }

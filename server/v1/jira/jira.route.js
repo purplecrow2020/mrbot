@@ -15,4 +15,13 @@ router.route('/integrations/:integrationId').delete(validate(paramValidation.jir
 router.route('/projects/:projectId/issues').get(validate(paramValidation.jira.createIntegration), AuthMiddleware.authenticate, jiraController.getAllIssuesOfSelectedProject);
 router.route('/projects/:projectId/issues/:issueId').get(validate(paramValidation.jira.createIntegration), AuthMiddleware.authenticate, jiraController.getDetailsOfSelectedIssuesOfSelectedProject);
 
+// this is not working properly
+router.route('/projects').put(validate(paramValidation.jira.createIntegration), jiraController.updateJiraProjectByProjectId);
+
+// re-authentication integration
+router.route('/integration').put(validate(paramValidation.jira.createIntegration), AuthMiddleware.authenticate, jiraController.updateIntegration);
+
+
+
+
 module.exports = router;

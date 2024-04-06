@@ -44,8 +44,12 @@ function extractInfoFromCode(code) {
 }
 
 
-function getJiraInstanceUrlForProject(id) {
-    return `https://api.atlassian.com/ex/jira/${id}/rest/api/3/project`;
+function getJiraInstanceUrlForProject(id, projectId) {
+    if (projectId){
+        return `https://api.atlassian.com/ex/jira/${id}/rest/api/3/project/${projectId}`;
+    }else{
+        return `https://api.atlassian.com/ex/jira/${id}/rest/api/3/project`;
+    }
 }
 
 async function getJiraInstanceDetails(token) {
@@ -59,7 +63,7 @@ async function getJiraInstanceDetails(token) {
 
 async function listProjects(token) {
     const instanceDetails = await getJiraInstanceDetails(token).then((res) => res.data)
-    console.log("instanceDetailsinstanceDetails", instanceDetails)
+    console.log("instanceDetailsinstanceDetails", token,  instanceDetails)
     const id = instanceDetails[0].id
     const url = getJiraInstanceUrlForProject(id)
     const response = await axios.get(url, {
@@ -85,10 +89,47 @@ async function listProjects(token) {
     return data;
 }   
 
+async function selectedProjectToUpdate(token, projectId, body) {
+    const instanceDetails = await getJiraInstanceDetails(token).then((res) => res.data);
+
+    const id = instanceDetails[0].id;
+
+    console.log("id========", instanceDetails, id)
+   try {
+     const url = getJiraInstanceUrlForProject(id, projectId)
+       const response = await axios.put(url, body, {
+         headers: {
+             'Authorization': `Bearer ${token}`,
+             'Accept': 'application/json'
+         }
+     })
+ 
+     console.log("id======== response", response)
+ 
+     const data = response.data.map(({
+         key,
+         name,
+         avatarUrls,
+         id,
+     }) => {
+         return {
+             projectKey: key,
+             projectLabel: name,
+             avatars: avatarUrls,
+             projectId: id,
+         }
+     })
+     return data;
+   } catch (error) {
+      console.log("error---===---=0", error)
+   }
+}   
+
 module.exports = {
     getJiraRedirectUri,
     getScopesNeededForJiraIntegration,
     getAccessToken,
     extractInfoFromCode,
     listProjects,
+    selectedProjectToUpdate
 }
