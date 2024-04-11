@@ -10,6 +10,8 @@ router.route('/').post(AuthMiddleware.authenticate, scrumController.createSchedu
 router.route('/').get(AuthMiddleware.authenticate, scrumController.getAllSchedules);
 router.route('/:scheduleId').put(AuthMiddleware.authenticate, scrumController.updateSchedule);
 router.route('/:scheduleId').delete(AuthMiddleware.authenticate, scrumController.deleteSchedule);
+router.route('/:scrumId').get(AuthMiddleware.authenticate, scrumController.getScheduleByScrumId);
+
 
 
 

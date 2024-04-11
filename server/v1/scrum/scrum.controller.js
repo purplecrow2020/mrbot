@@ -159,9 +159,47 @@ async function deleteSchedule(req, res) {
 };
 
 
+async function getScheduleByScrumId(req, res) {
+    try {
+        const {scrumId} = req.params;
+        const mongo = req.app.get('db');
+        const selectedScrum = await mongo.collection('schedules').findOne({ _id: new ObjectId(scrumId) });
+
+        if (!selectedScrum) {
+            res.status(400).json({
+                "meta": {
+                    "success": false,
+                    "message": `unable to get all schedules details`
+                },
+                "data": null,
+            })
+        } else {
+            res.status(200).json({
+                "meta": {
+                    "success": true,
+                    "message": ` get all schedules successfully`
+                },
+                "data": selectedScrum,
+            })
+        }
+
+    } catch (error) {
+        res.status(500).json({
+            "meta": {
+                "success": false,
+                "message": `Internal server error ${error}`
+            },
+            "data": null,
+        })
+        console.log("Error", error)
+    }
+};
+
+
 module.exports = {
     createSchedule,
     getAllSchedules,
     updateSchedule,
-    deleteSchedule
+    deleteSchedule,
+    getScheduleByScrumId
 }
