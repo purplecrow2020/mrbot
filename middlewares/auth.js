@@ -12,9 +12,6 @@ async function authenticate(req, res, next) {
         } = req.headers
 
         const payload = Token.verify(authorization, config.jwtSecret);
-        console.log(payload)
-
-
         const { id } = payload;
         const userDetails = await mongo.collection('users').findOne({
             "_id": new ObjectId(id),
