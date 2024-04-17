@@ -179,7 +179,7 @@ async function doneTimer(req, res) {
 
         const timer = await mongo.collection('timer').findOne({ _id: new ObjectId(timerId) });
 
-        if (timer.status === 'DONE' || timer.timer > timeFromBody ) {
+        if (timer.status === 'DONE' || (+timer.timer) > (+timeFromBody) ) {
             return res.status(300).json({
                 "meta": {
                     "success": false,
@@ -189,33 +189,33 @@ async function doneTimer(req, res) {
             })
         }
 
+        if ((+timer.timer) == (+timeFromBody)){
+            const updatedTimeStatus = await mongo.collection('timer').updateOne(
+                { _id: new ObjectId(timerId) },
+                { $set: newData },
+                (err, result) => {
+                    console.log("err", err,)
+                    console.log("result", result);
+                }
+            );
 
-        const updatedTimeStatus = await mongo.collection('timer').updateOne(
-            { _id: new ObjectId(timerId) },
-            { $set: newData },
-            (err, result) => {
-                console.log("err", err,)
-                console.log("result", result);
+            if (!updatedTimeStatus.modifiedCount) {
+                return res.status(400).json({
+                    "meta": {
+                        "success": false,
+                        "message": `unable to change timer status details to Database`
+                    },
+                    "data": null,
+                })
+            } else {
+                return res.status(201).json({
+                    "meta": {
+                        "success": true,
+                        "message": `Timer status updated successfully to the Database`
+                    },
+                    "data": updatedTimeStatus,
+                })
             }
-        );
-
-
-        if (!updatedTimeStatus.modifiedCount) {
-            return res.status(400).json({
-                "meta": {
-                    "success": false,
-                    "message": `unable to change timer status details to Database`
-                },
-                "data": null,
-            })
-        } else {
-            return res.status(201).json({
-                "meta": {
-                    "success": true,
-                    "message": `Timer status updated successfully to the Database`
-                },
-                "data": updatedTimeStatus,
-            })
         }
 
     } catch (error) {
@@ -309,11 +309,51 @@ async function getTimerByTimerId(req, res) {
 };
 
 
+async function deleteTimerByTimerId(req, res) {
+    try {
+        const { timerId } = req.params;
+        const mongo = req.app.get('db');
+
+        const deletedTimer = await mongo.collection('timer').deleteOne({ _id: new ObjectId(timerId) });
+
+        if (!deletedTimer) {
+            return res.status(400).json({
+                "meta": {
+                    "success": false,
+                    "message": `Unable to delete timer details from Database`
+                },
+                "data": null,
+            })
+        } else {
+            return res.status(200).json({
+                "meta": {
+                    "success": true,
+                    "message": `deleted timer details successfully`
+                },
+                "data": deletedTimer,
+            })
+        }
+
+    } catch (error) {
+        console.log("Error", error)
+
+        return res.status(500).json({
+            "meta": {
+                "success": false,
+                "message": `Internal server error ${error}`
+            },
+            "data": null,
+        })
+    }
+};
+
+
 module.exports = {
     addTimer,
     pauseTimer,
     resumeTimer,
     doneTimer,
     getAllTimers,
-    getTimerByTimerId
+    getTimerByTimerId,
+    deleteTimerByTimerId
 }

@@ -12,6 +12,8 @@ router.route('/resume/:timerId').patch(AuthMiddleware.authenticate, timerControl
 router.route('/done/:timerId').patch(AuthMiddleware.authenticate, timerController.doneTimer);
 router.route('/').get(AuthMiddleware.authenticate, timerController.getAllTimers);
 router.route('/:timerId').get(AuthMiddleware.authenticate, timerController.getTimerByTimerId);
+router.route('/:timerId').delete(AuthMiddleware.authenticate, timerController.deleteTimerByTimerId);
+
 
 
 module.exports = router;
