@@ -244,7 +244,16 @@ async function getAllTimers(req, res) {
             }
         };
 
-        const allTimers = await mongo.collection('timer').find(filterQuery).sort({ _id: -1 }).toArray();
+        const PAGE_SIZE = +req.query.pageSize || 5; 
+        const pageNumber = +req.query.pageNumber || 1;
+        const skipCount = (pageNumber - 1) * PAGE_SIZE;
+
+        const allTimers = await mongo.collection('timer')
+            .find(filterQuery ? filterQuery : {})
+            .sort({ _id: -1 })
+            .skip(skipCount) 
+            .limit(PAGE_SIZE) 
+            .toArray();
 
         if (!allTimers) {
             return res.status(400).json({
