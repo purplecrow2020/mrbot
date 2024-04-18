@@ -235,8 +235,16 @@ async function doneTimer(req, res) {
 async function getAllTimers(req, res) {
     try {
         const mongo = req.app.get('db');
+        const query = req.query;
 
-        const allTimers = await mongo.collection('timer').find().toArray();
+        const filterQuery = {
+            createdAt: {
+                $gte: new Date(query.startDate),
+                $lte: new Date(query.endDate),
+            }
+        };
+
+        const allTimers = await mongo.collection('timer').find(filterQuery).sort({ _id: -1 }).toArray();
 
         if (!allTimers) {
             return res.status(400).json({
