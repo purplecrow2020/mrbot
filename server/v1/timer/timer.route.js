@@ -7,7 +7,7 @@ const router = express.Router();
 const timerController = require('./timer.controller');
 
 router.route('/').post(AuthMiddleware.authenticate, timerController.addTimer);
-router.route('/pause/:timerId').patch(AuthMiddleware.authenticate, timerController.pauseTimer);
+router.route('/pause/:timerId').put(AuthMiddleware.authenticate, timerController.pauseTimer);
 router.route('/resume/:timerId').patch(AuthMiddleware.authenticate, timerController.resumeTimer);
 router.route('/done/:timerId').patch(AuthMiddleware.authenticate, timerController.doneTimer);
 router.route('/').get(AuthMiddleware.authenticate, timerController.getAllTimers);
