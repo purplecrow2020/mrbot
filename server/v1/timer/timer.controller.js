@@ -9,11 +9,11 @@ async function addTimer(req, res) {
         const newData = { ...req.body, createdAt: currentTime };
 
         const mongo = req.app.get('db');
-        const newSchedule = await mongo.collection('timer').insertOne(newData);
+        const newTimer = await mongo.collection('timer').insertOne(newData);
 
-        const insertedTimer = await mongo.collection('timer').findOne({ _id: newSchedule.insertedId });
+        const insertedTimer = await mongo.collection('timer').findOne({ _id: newTimer.insertedId });
 
-        if (!newSchedule) {
+        if (!newTimer) {
             return res.status(400).json({
                 "meta": {
                     "success": false,
@@ -39,9 +39,98 @@ async function addTimer(req, res) {
             },
             "data": null,
         })
-        console.log("Error", error)
     }
 };
+
+
+async function updateTimer(req, res){
+    try {
+        const {status} = req.body;
+        const { timerId } = req.params;
+
+        const currentTime = new Date();
+        let timerStatusKey;
+
+        switch (status) {
+            case 'START':
+                console.log("status START", status);
+                timerStatusKey = 'startedAt';
+                break;
+            case 'PAUSED':
+                console.log("status PAUSED", status);
+                timerStatusKey = 'pausedAt';
+                break;
+            case 'RESUMED':
+                console.log("status RESUMED", status);
+                timerStatusKey = 'resumedAt';
+                break;
+            case 'DONE':
+                console.log("status DONE", status);
+                timerStatusKey = 'doneAt';
+                break;
+            case 'STOPPED':
+                console.log("status STOPPED", status);
+                timerStatusKey = 'stoppedAt';
+                break;
+            default:
+                console.log("status default", status);
+                timerStatusKey = 'updateAt';
+        }
+
+
+        const newData = { ...req.body, [timerStatusKey]: currentTime };
+
+        const mongo = req.app.get('db');
+
+        const timer = await mongo.collection('timer').findOne({ _id: new ObjectId(timerId) });
+        if (timer.status === status) {
+            return res.status(300).json({
+                "meta": {
+                    "success": false,
+                    "message": `can not be ${status.toLowerCase()} this timer`
+                },
+                "data": null,
+            })
+        }
+
+        const updatedTimeStatus = await mongo.collection('timer').updateOne(
+            { _id: new ObjectId(timerId) },
+            { $set: newData },
+            (err, result) => {
+                console.log("err", err,)
+                console.log("result", result);
+            }
+        );
+
+        if (!updatedTimeStatus.modifiedCount) {
+            return res.status(400).json({
+                "meta": {
+                    "success": false,
+                    "message": `unable to change timer status details to Database`
+                },
+                "data": null,
+            })
+        } else {
+            return res.status(201).json({
+                "meta": {
+                    "success": true,
+                    "message": `Timer status updated successfully to the Database`
+                },
+                "data": updatedTimeStatus,
+            })
+        }
+
+    } catch (error) {
+        return res.status(500).json({
+            "meta": {
+                "success": false,
+                "message": `Internal server error ${error}`
+            },
+            "data": null,
+        })
+        console.log("Error", error)
+    }
+}
 
 
 async function pauseTimer(req, res) {
@@ -367,9 +456,12 @@ async function deleteTimerByTimerId(req, res) {
 
 module.exports = {
     addTimer,
+    updateTimer,
+
     pauseTimer,
     resumeTimer,
     doneTimer,
+
     getAllTimers,
     getTimerByTimerId,
     deleteTimerByTimerId
