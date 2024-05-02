@@ -8,6 +8,8 @@ const jiraRoutes = require('./jira/jira.route');
 const scrumRoutes = require('./scrum/scrum.route');
 const timerRoutes = require('./timer/timer.route');
 const calendarRoutes = require('./calendar/calendar.route');
+const messageRoutes = require('./message/message.route');
+
 
 
 // router usages
@@ -17,6 +19,8 @@ router.use('/jira', jiraRoutes);
 router.use('/scrum', scrumRoutes);
 router.use('/timer', timerRoutes);
 router.use('/calendar', calendarRoutes);
+router.use('/message', messageRoutes);
+
 
 
 

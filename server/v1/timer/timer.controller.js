@@ -83,7 +83,7 @@ async function updateTimer(req, res){
         const mongo = req.app.get('db');
 
         const timer = await mongo.collection('timer').findOne({ _id: new ObjectId(timerId) });
-        if (timer.status === status) {
+        if (timer.status !== 'RESUMED' && timer.status === status) {
             return res.status(300).json({
                 "meta": {
                     "success": false,
