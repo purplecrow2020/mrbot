@@ -21,7 +21,6 @@ const templatesData = [
                               type='text'
                               placeholder='Gender'
                               class='tooltip__input'
-                              value = value
                           />
                       </span>
 
@@ -43,7 +42,7 @@ const templatesData = [
                       </span>
                        the reason behind this is  ths
                       <span>
-                       <select class="custom_selector__send_message__select" id="select_for" name="reason">
+                       <select class="custom_selector__send_message__select select" id="select_for" name="reason">
                          <option class="option-style" value="medical">Medical</option>
                          <option  class="option-style" value="festival">Festival</option>
                          <option  class="option-style" value="work">Work</option>
@@ -73,7 +72,7 @@ const templatesData = [
                      
                        the reason behind this is  ths
                       <span>
-                       <select class="custom_selector__send_message__select" id="select_for" name="reason">
+                       <select class="custom_selector__send_message__select select" id="select_for" name="reason">
                          <option class="option-style" value="project-discussion">Project discussion</option>
                          <option  class="option-style" value="hiring">Hiring</option>
                          <option  class="option-style" value="work">Work</option>
@@ -109,7 +108,7 @@ const templatesData = [
                       </span>
                      
                        these are the option available for you guys to select anyone from that
-                       <select class="custom_selector__send_message__select" id="select_for" name="reason">
+                       <select class="custom_selector__send_message__select select" id="select_for" name="reason">
                          <option class="option-style" value="jaipur">Jaipur</option>
                          <option  class="option-style" value="shimla">Shimla</option>
                          <option  class="option-style" value="tasken">Tasken</option>
@@ -121,7 +120,7 @@ const templatesData = [
 const selectionOptions = [
     {
         category: 'Leave application',
-        reason: [
+        selectionOptions: [
             {
                 label: 'Festival',
                 value: 'festival'
@@ -133,12 +132,21 @@ const selectionOptions = [
             {
                 label: 'Tour',
                 value: 'tour'
+            },
+            {
+                label: "Family's take care",
+                value: "family's take care"
+            },
+            {
+                label: "To attend a party",
+                value: "to attend a party"
             }
-        ]  
+        ],
+        toolTipOptions: ["He", "She", "Other", "test1"]  
     },
     {
         category: 'Tour plan',
-        cities: [
+        selectionOptions: [
             {
                 label: 'Jaipur',
                 value: 'jaipur'
@@ -150,6 +158,10 @@ const selectionOptions = [
             {
                 label: 'Tasken',
                 value: 'tasken'
+            },
+            {
+                label: 'Andman and nikobar',
+                value: 'andman and nikobar'
             }
         ],
         typesOfTrip: [
@@ -169,7 +181,7 @@ const selectionOptions = [
     },
     {
         category: 'Emergency meeting',
-        meetingReason: [
+        selectionOptions: [
             {
                 label: 'Work',
                 value: 'work'
@@ -293,7 +305,6 @@ async function addMessage(req, res) {
 async function messageTemplates(req, res){
     try {
         const queryString = req.query;
-     
         if (!queryString.subjectTitle) {
             return res.status(400).json({
                 "meta": {
@@ -304,8 +315,9 @@ async function messageTemplates(req, res){
             })
         }
        
+       
 
-        const selectedTemplates = templatesData.find((_template) => _template.category === queryString.subjectTitle)
+        const selectedTemplates = templatesData.find((_template) =>  _template.category.toLowerCase() === queryString.subjectTitle.toLowerCase())
         if (selectedTemplates) {
             return res.status(201).json({
                 "meta": {
@@ -331,7 +343,6 @@ async function messageTemplates(req, res){
 async function messageSelectedTemplateSelectionOptions(req, res){
     try {
         const queryString = req.query;
-
         if (!queryString.subjectTitle) {
             return res.status(400).json({
                 "meta": {
@@ -342,15 +353,14 @@ async function messageSelectedTemplateSelectionOptions(req, res){
             })
         }
 
-
-        const selectedOption = selectionOptions.find((_option) => _option.category === queryString.subjectTitle)
-        if (selectedTemplates) {
+        const selectedOption = selectionOptions.find((_option) => _option.category.toLowerCase() === queryString.subjectTitle.toLowerCase());
+        if (selectedOption) {
             return res.status(201).json({
                 "meta": {
                     "success": true,
                     "message": `Options successfully filtered from the Database`
                 },
-                "data": selectedTemplates,
+                "data": selectedOption,
             })
         }
 
@@ -366,9 +376,82 @@ async function messageSelectedTemplateSelectionOptions(req, res){
     }
 }
 
+async function getAllMessage(req, res){
+    try {
+        const mongo = req.app.get('db');
+       
+        const messages = await mongo.collection('message').find().toArray();
+
+        if (!messages) {
+            return res.status(400).json({
+                "meta": {
+                    "success": false,
+                    "message": `unable to get message details from Database`
+                },
+                "data": null,
+            })
+        } else {
+            return res.status(201).json({
+                "meta": {
+                    "success": true,
+                    "message": `Message successfully get from the Database`
+                },
+                "data": messages,
+            })
+        }
+
+    } catch (error) {
+        return res.status(500).json({
+            "meta": {
+                "success": false,
+                "message": `Internal server error ${error}`
+            },
+            "data": null,
+        })
+    }
+}
+
+async function getMessage(req, res){
+    try {
+        const mongo = req.app.get('db');
+        const { messageId } = req.params;
+
+        const message = await mongo.collection('message').findOne({ _id: new ObjectId(messageId)});
+
+        if (!message) {
+            return res.status(400).json({
+                "meta": {
+                    "success": false,
+                    "message": `unable to get message details from Database`
+                },
+                "data": null,
+            })
+        } else {
+            return res.status(201).json({
+                "meta": {
+                    "success": true,
+                    "message": `Message successfully get from the Database`
+                },
+                "data": message,
+            })
+        }
+
+    } catch (error) {
+        return res.status(500).json({
+            "meta": {
+                "success": false,
+                "message": `Internal server error ${error}`
+            },
+            "data": null,
+        })
+    } 
+}
+
 module.exports = {
     searchAutoCompleteSubject,
     addMessage,
     messageTemplates,
-    messageSelectedTemplateSelectionOptions
+    messageSelectedTemplateSelectionOptions,
+    getAllMessage,
+    getMessage
 }
