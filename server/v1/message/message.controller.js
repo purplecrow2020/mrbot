@@ -18,6 +18,7 @@ const templatesData = [
                       &
                       <span>
                           <input
+                              id='applicantGender'
                               type='text'
                               placeholder='Gender'
                               class='tooltip__input'
